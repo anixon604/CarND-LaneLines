@@ -45,7 +45,6 @@ def generate_arrays_from_list(list): # generated from LISTS
                 yield (img, y)
 
 ### MODEL NVIDIA Base "End to End Learning for SDC" Bojarski, Testa, et al. ---
-# input -> normalization -> 3 filter/5x5 kernel ->
 
 # conv kernel sizes
 kernel_3 = (3,3)
@@ -77,9 +76,9 @@ batch = 256
 model.compile(loss='mse', optimizer=Adam())
 
 model.fit_generator(generate_arrays_from_list(traindata),
-    samples_per_epoch=train_len, nb_epoch=epoch,
-    validation_data=generate_arrays_from_list(valdata), nb_val_samples=val_len)
-score = model.evaluate_generator(generate_arrays_from_list(testdata), val_samples=test_len)
+    samples_per_epoch=len(traindata), nb_epoch=epoch,
+    validation_data=generate_arrays_from_list(valdata), nb_val_samples=len(valdata))
+score = model.evaluate_generator(generate_arrays_from_list(testdata), val_samples=len(testdata))
 
 # SAVE MODEL and WEIGHTS
 model.save_weights('./model.h5')
