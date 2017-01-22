@@ -77,9 +77,9 @@ batch = 256
 model.compile(loss='mse', optimizer=Adam())
 
 model.fit_generator(generate_arrays_from_list(traindata),
-    samples_per_epoch=10, nb_epoch=epoch,
-    validation_data=generate_arrays_from_list(valdata), nb_val_samples=10)
-score = model.evaluate_generator(generate_arrays_from_list(testdata), val_samples=10)
+    samples_per_epoch=train_len, nb_epoch=epoch,
+    validation_data=generate_arrays_from_list(valdata), nb_val_samples=val_len)
+score = model.evaluate_generator(generate_arrays_from_list(testdata), val_samples=test_len)
 
 # SAVE MODEL and WEIGHTS
 model.save_weights('./model.h5')
