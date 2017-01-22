@@ -1,4 +1,4 @@
-import csv
+import csv, json
 from scipy.misc import imread
 from keras.models import Sequential
 from keras.layers import Convolution2D, Dropout, BatchNormalization
@@ -72,7 +72,7 @@ model.add(Dense(1))
 model.summary()
 
 # Compile and train model
-epoch = 10
+epoch = 3
 batch = 256
 model.compile(loss='mse', optimizer=Adam())
 
@@ -80,4 +80,10 @@ model.fit_generator(generate_arrays_from_list(traindata),
     samples_per_epoch=10, nb_epoch=epoch,
     validation_data=generate_arrays_from_list(valdata), nb_val_samples=10)
 score = model.evaluate_generator(generate_arrays_from_list(testdata), val_samples=10)
-print(score)
+
+# SAVE MODEL and WEIGHTS
+model.save_weights('./model.h5')
+json_string = model.to_json()
+
+with open('./model.json', 'w') as outfile:
+    outfile.write(json_string)
