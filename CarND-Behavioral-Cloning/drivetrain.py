@@ -14,23 +14,23 @@ import numpy as np
 # Read input and process CSV
 f = open('./data/driving_log.csv')
 reader = csv.reader(f)
-
-count = -1 # not include label row
 lines = []
 for line in reader:
-    count += 1
     lines.append(line)
 f.close
 
 lines = lines[1:] #drop label row [center, left, right, steering, throttle, brake, speed]
 
 # Split data into CENTER/LEFT/RIGHT images with corresponding angles
-centerlines = [[line[0], float(line[3])] for line in lines]
-leftlines = [[line[1], float(line[3])+random.randrange(15,30)*0.01] for line in lines]
-rightlines = [[line[2], float(line[3])-random.randrange(15,30)*0.01] for line in lines]
+centerlines = [[line[0].strip(), float(line[3])] for line in lines]
+leftlines = [[line[1].strip(), float(line[3])+random.randrange(15,30)*0.01] for line in lines]
+rightlines = [[line[2].strip(), float(line[3])-random.randrange(15,30)*0.01] for line in lines]
 
 lines = centerlines+leftlines+rightlines
 shuffle(lines) # Shuffle data
+count = len(lines)
+
+print(len(lines))
 
 def test_train_val_split(fulldata):
     train_len = int(count * 0.6) # 0 -> train_len-1
@@ -42,8 +42,10 @@ def test_train_val_split(fulldata):
 
 traindata, testdata, valdata = test_train_val_split(lines)
 
+print(len(traindata), len(testdata), len(valdata))
+
 def process_line(line): # numpy array on y
-    return line[0],np.array([line[3]])
+    return line[0],np.array([line[1]])
 
 # IMAGE modifications
 # randomize return
