@@ -1,4 +1,5 @@
-import csv, json
+import csv, json, random
+from random import shuffle
 from scipy.misc import imread
 from keras.models import Sequential
 from keras.layers import Convolution2D, Dropout, BatchNormalization
@@ -23,6 +24,14 @@ f.close
 
 lines = lines[1:] #drop label row [center, left, right, steering, throttle, brake, speed]
 
+# Split data into CENTER/LEFT/RIGHT images with corresponding angles
+centerlines = [[line[0], float(line[3])] for line in lines]
+leftlines = [[line[1], float(line[3])+random.randrange(15,30)*0.01] for line in lines]
+rightlines = [[line[2], float(line[3])-random.randrange(15,30)*0.01] for line in lines]
+
+lines = centerlines+leftlines+rightlines
+shuffle(lines) # Shuffle data
+
 def test_train_val_split(fulldata):
     train_len = int(count * 0.6) # 0 -> train_len-1
     test_len = int((count - train_len)/2) # train_len -> (train_len+test_len-1)
@@ -35,6 +44,11 @@ traindata, testdata, valdata = test_train_val_split(lines)
 
 def process_line(line): # numpy array on y
     return line[0],np.array([line[3]])
+
+# IMAGE modifications
+# randomize return
+# FLIP Y (negate angle)
+# LEFT IMG (add .15-.3 angle) RIGHT IMG (sub .15-.3 angle)
 
 def generate_arrays_from_list(list): # generated from LISTS
         while 1:
