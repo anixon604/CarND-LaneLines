@@ -1,4 +1,5 @@
 import csv, json, random
+from cv2 import flip
 from random import shuffle
 from scipy.misc import imread
 from keras.models import Sequential
@@ -30,8 +31,6 @@ lines = centerlines+leftlines+rightlines
 shuffle(lines) # Shuffle data
 count = len(lines)
 
-print(len(lines))
-
 def test_train_val_split(fulldata):
     train_len = int(count * 0.6) # 0 -> train_len-1
     test_len = int((count - train_len)/2) # train_len -> (train_len+test_len-1)
@@ -45,20 +44,34 @@ traindata, testdata, valdata = test_train_val_split(lines)
 print(len(traindata), len(testdata), len(valdata))
 
 def process_line(line): # numpy array on y
-    return line[0],np.array([line[1]])
+    angle = line[1]
+    angleAdj = random.randrange(-3,6)
+    img = get_image(line[0])
 
-# IMAGE modifications
-# randomize return
-# FLIP Y (negate angle)
-# LEFT IMG (add .15-.3 angle) RIGHT IMG (sub .15-.3 angle)
+    #random perturb angle 50% chance
+    if angleAdj <= 3:
+        angle += angleAdj
+    #50% chance of flipping image
+    if angleAdj % 2 == 0:
+        img = flip(img,1)
+        angle = -angle
+
+    return np.array([img]),np.array([angle])
+
+def get_image(filename):
+    # Crop 55 from top, 15 from bottom with splice = img[55:135, :, :]
+    # Random Flip Y
+    # Random Perturb angle
+    img = imread('./data/' + filename)
+    img = img[55:135,:,:]
+    return img
+
 
 def generate_arrays_from_list(list): # generated from LISTS
         while 1:
             for line in list:
-                x, y = process_line(line)
-                img = np.array([imread('./data/' + x)])
-                # numpy array on img
-                yield (img, y)
+                x, y = process_line(line) # x - image, y - angle
+                yield (x, y)
 
 ### MODEL NVIDIA Base "End to End Learning for SDC" Bojarski, Testa, et al. ---
 
@@ -70,7 +83,7 @@ kernel_5 = (5,5)
 stride_2 = (2,2)
 
 # possible resizing to lower for speed
-input_shape = (160, 320, 3)
+input_shape = (80, 320, 3)
 
 model = Sequential()
 model.add(BatchNormalization(input_shape=input_shape))
@@ -87,12 +100,13 @@ model.add(Dense(1))
 model.summary()
 
 # Compile and train model
-epoch = 3
+epoch = 10
 batch = 256
+sampEpoch = 40000
 model.compile(loss='mse', optimizer=Adam())
 
 model.fit_generator(generate_arrays_from_list(traindata),
-    samples_per_epoch=len(traindata), nb_epoch=epoch,
+    samples_per_epoch=sampEpoch, nb_epoch=epoch,
     validation_data=generate_arrays_from_list(valdata), nb_val_samples=len(valdata))
 score = model.evaluate_generator(generate_arrays_from_list(testdata), val_samples=len(testdata))
 
