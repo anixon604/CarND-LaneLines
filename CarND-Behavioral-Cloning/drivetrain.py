@@ -24,21 +24,21 @@ lines = lines[1:] #drop label row [center, left, right, steering, throttle, brak
 
 # Split data into CENTER/LEFT/RIGHT images with corresponding angles
 centerlines = [[line[0].strip(), float(line[3])] for line in lines]
-leftlines = [[line[1].strip(), float(line[3])+random.randrange(15,30)*0.01] for line in lines]
-rightlines = [[line[2].strip(), float(line[3])-random.randrange(15,30)*0.01] for line in lines]
+leftlines = [[line[1].strip(), float(line[3])+0.25] for line in lines]
+rightlines = [[line[2].strip(), float(line[3])-0.25] for line in lines]
 
 lines = centerlines+leftlines+rightlines
 shuffle(lines) # Shuffle data
 count = len(lines)
 
-def test_train_val_split(fulldata):
+def train_val_split(fulldata):
     train_len = int(count * 0.8) # 0 -> train_len-1
     val_len = count - train_len # (train_len+test_len) -> count-1
     assert count == (train_len+val_len)
 
     return lines[0:train_len],lines[train_len:]
 
-traindata, valdata = test_train_val_split(lines)
+traindata, valdata = train_val_split(lines)
 
 print(len(traindata), len(valdata))
 
