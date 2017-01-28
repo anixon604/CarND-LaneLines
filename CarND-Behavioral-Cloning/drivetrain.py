@@ -51,7 +51,7 @@ def process_line(line): # numpy array on y
     if angleAdj <= 3:
         angle += angleAdj
     #50% chance of flipping image
-    if angleAdj % 2 == 0:
+    if angleAdj % 2 == 0 and angle != 0:
         img = flip(img,1)
         angle = -angle
 
