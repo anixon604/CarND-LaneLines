@@ -32,16 +32,15 @@ shuffle(lines) # Shuffle data
 count = len(lines)
 
 def test_train_val_split(fulldata):
-    train_len = int(count * 0.6) # 0 -> train_len-1
-    test_len = int((count - train_len)/2) # train_len -> (train_len+test_len-1)
-    val_len = count - test_len - train_len # (train_len+test_len) -> count-1
-    assert count == (train_len+test_len+val_len)
+    train_len = int(count * 0.8) # 0 -> train_len-1
+    val_len = count - train_len # (train_len+test_len) -> count-1
+    assert count == (train_len+val_len)
 
-    return lines[0:train_len],lines[train_len:train_len+test_len],lines[train_len+test_len:]
+    return lines[0:train_len],lines[train_len:]
 
-traindata, testdata, valdata = test_train_val_split(lines)
+traindata, valdata = test_train_val_split(lines)
 
-print(len(traindata), len(testdata), len(valdata))
+print(len(traindata), len(valdata))
 
 def process_line(line): # numpy array on y
     angle = line[1]
