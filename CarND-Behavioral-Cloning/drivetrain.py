@@ -99,7 +99,7 @@ model.add(Dense(1))
 model.summary()
 
 # Compile and train model
-epoch = 10
+epoch = 8
 batch = 256
 sampEpoch = 40000
 model.compile(loss='mse', optimizer=Adam())
