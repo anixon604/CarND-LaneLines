@@ -99,9 +99,9 @@ model.add(Dense(1))
 model.summary()
 
 # Compile and train model
-epoch = 4
+epoch = 6
 batch = 256
-sampEpoch = 5000
+sampEpoch = 20000
 model.compile(loss='mse', optimizer=Adam())
 
 model.fit_generator(generate_arrays_from_list(traindata),
