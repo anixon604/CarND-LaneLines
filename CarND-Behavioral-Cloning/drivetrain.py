@@ -24,8 +24,8 @@ lines = lines[1:] #drop label row [center, left, right, steering, throttle, brak
 
 # Split data into CENTER/LEFT/RIGHT images with corresponding angles
 centerlines = [[line[0].strip(), float(line[3])] for line in lines]
-leftlines = [[line[1].strip(), float(line[3])+0.02] for line in lines]
-rightlines = [[line[2].strip(), float(line[3])-0.02] for line in lines]
+leftlines = [[line[1].strip(), float(line[3])+0.01] for line in lines]
+rightlines = [[line[2].strip(), float(line[3])-0.01] for line in lines]
 
 lines = centerlines+leftlines+rightlines
 shuffle(lines) # Shuffle data
@@ -49,7 +49,7 @@ def process_line(line): # numpy array on y
 
     #random perturb angle 50% chance
     if angleAdj <= 3:
-        angle += (angleAdj*0.01)
+        angle += (angleAdj*0.001)
     #50% chance of flipping image
     if angleAdj % 2 == 0 and angle != 0:
         img = flip(img,1)
@@ -101,7 +101,7 @@ model.summary()
 # Compile and train model
 epoch = 4
 batch = 256
-sampEpoch = 10000
+sampEpoch = 5000
 model.compile(loss='mse', optimizer=Adam())
 
 model.fit_generator(generate_arrays_from_list(traindata),
