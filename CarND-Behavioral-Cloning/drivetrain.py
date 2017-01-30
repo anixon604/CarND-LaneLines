@@ -2,6 +2,7 @@ import csv, json, random
 from cv2 import flip
 from random import shuffle
 from scipy.misc import imread
+from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 from keras.layers import Convolution2D, Dropout, BatchNormalization
 from keras.layers.core import Flatten, Dense, Activation
@@ -24,8 +25,8 @@ lines = lines[1:] #drop label row [center, left, right, steering, throttle, brak
 
 # Split data into CENTER/LEFT/RIGHT images with corresponding angles
 centerlines = [[line[0].strip(), float(line[3])] for line in lines]
-leftlines = [[line[1].strip(), float(line[3])+0.12] for line in lines]
-rightlines = [[line[2].strip(), float(line[3])-0.12] for line in lines]
+leftlines = [[line[1].strip(), float(line[3])+0.15] for line in lines]
+rightlines = [[line[2].strip(), float(line[3])-0.15] for line in lines]
 
 lines = centerlines+leftlines+rightlines
 shuffle(lines) # Shuffle data
@@ -104,9 +105,13 @@ batch = 256
 sampEpoch = 40000
 model.compile(loss='mse', optimizer=Adam())
 
+earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto')
+
+
 model.fit_generator(generate_arrays_from_list(traindata),
     samples_per_epoch=sampEpoch, nb_epoch=epoch,
-    validation_data=generate_arrays_from_list(valdata), nb_val_samples=len(valdata))
+    validation_data=generate_arrays_from_list(valdata), nb_val_samples=len(valdata),
+    callbacks=[earlystop])
 
 # SAVE MODEL and WEIGHTS
 model.save_weights('./model.h5')
