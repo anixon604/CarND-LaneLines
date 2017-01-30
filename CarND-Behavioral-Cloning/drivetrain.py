@@ -24,8 +24,8 @@ lines = lines[1:] #drop label row [center, left, right, steering, throttle, brak
 
 # Split data into CENTER/LEFT/RIGHT images with corresponding angles
 centerlines = [[line[0].strip(), float(line[3])] for line in lines]
-leftlines = [[line[1].strip(), float(line[3])+0.15] for line in lines]
-rightlines = [[line[2].strip(), float(line[3])-0.15] for line in lines]
+leftlines = [[line[1].strip(), float(line[3])+0.2] for line in lines]
+rightlines = [[line[2].strip(), float(line[3])-0.2] for line in lines]
 
 lines = centerlines+leftlines+rightlines
 shuffle(lines) # Shuffle data
