@@ -28,20 +28,20 @@ centerlines = [[line[0].strip(), float(line[3])] for line in lines]
 leftlines = [[line[1].strip(), float(line[3])+0.15] for line in lines]
 rightlines = [[line[2].strip(), float(line[3])-0.15] for line in lines]
 
-lines = centerlines+leftlines+rightlines
-shuffle(lines) # Shuffle data
-count = len(lines)
+count = len(centerlines)
+train_len = int(count*0.95)
 
-def train_val_split(fulldata):
-    train_len = int(count * 0.8) # 0 -> train_len-1
+# splits data into 85% traindata, 15% valdata
+def train_val_split(center, left, right):
     val_len = count - train_len # (train_len+test_len) -> count-1
     assert count == (train_len+val_len)
+    traindata = [center[0:train_len], left[0:train_len], right[0:train_len]]
+    valdata = [center[train_len:],left[train_len:],right[train_len:]]
 
-    return lines[0:train_len],lines[train_len:]
+    return traindata, valdata
 
-traindata, valdata = train_val_split(lines)
-
-print(len(traindata), len(valdata))
+#traindata,valdata is 2D list with center/left/right data seperate
+traindata, valdata = train_val_split(centerlines,leftlines,rightlines)
 
 def process_line(line): # numpy array on y
     angle = line[1]
@@ -67,11 +67,16 @@ def get_image(filename):
     return img
 
 
-def generate_arrays_from_list(list): # generated from LISTS
+def generate_arrays_from_list(data): # generated from LISTS
         while 1:
-            for line in list:
-                x, y = process_line(line) # x - image, y - angle
-                yield (x, y)
+            ind = random.randrange(0,train_len)
+            camlist = random.randrange(0,2)
+            line = data[camlist][ind]
+            x, y = process_line(line) # x - image, y - angle
+            yield (x, y)
+
+#TODOS 1. Normalize, Jitter (translate left/right), brightness?
+
 
 ### MODEL NVIDIA Base "End to End Learning for SDC" Bojarski, Testa, et al. ---
 
