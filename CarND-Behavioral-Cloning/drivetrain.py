@@ -69,7 +69,8 @@ def get_image(filename):
 
 def generate_arrays_from_list(data): # generated from LISTS
         while 1:
-            ind = random.randrange(0,train_len)
+            size = len(data[0])
+            ind = random.randrange(0,size)
             camlist = random.randrange(0,2)
             line = data[camlist][ind]
             x, y = process_line(line) # x - image, y - angle
