@@ -113,10 +113,10 @@ model.add(Convolution2D(64, kernel_3[0], kernel_3[1], border_mode='valid'))
 model.add(Convolution2D(64, kernel_3[0], kernel_3[1], border_mode='valid'))
 model.add(Flatten())
 model.add(Dense(100))
-model.add(Dropout(0.5))
 model.add(Dense(50))
 model.add(Dense(10))
 model.add(Dense(1))
+model.add(Dropout(0.5))
 model.summary()
 
 # Compile and train model
