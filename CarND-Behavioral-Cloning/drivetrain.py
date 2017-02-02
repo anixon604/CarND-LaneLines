@@ -12,24 +12,36 @@ import numpy as np
 
 
 ## WILL TRAIN ON provided. TEST on recorded DATA.
+def openDatas(path):
+    # Read input and process CSV
+    f = open(path)
+    reader = csv.reader(f)
+    lines = []
+    for line in reader:
+        lines.append(line)
+    f.close
 
-# Read input and process CSV
-f = open('./data/driving_log.csv')
-reader = csv.reader(f)
-lines = []
-for line in reader:
-    lines.append(line)
-f.close
+    lines = lines[1:] #drop label row [center, left, right, steering, throttle, brake, speed]
 
-lines = lines[1:] #drop label row [center, left, right, steering, throttle, brake, speed]
+    # Split data into CENTER/LEFT/RIGHT images with corresponding angles
+    centerlines = [[line[0].strip(), float(line[3])] for line in lines]
+    leftlines = [[line[1].strip(), float(line[3])+0.15] for line in lines]
+    rightlines = [[line[2].strip(), float(line[3])-0.15] for line in lines]
 
-# Split data into CENTER/LEFT/RIGHT images with corresponding angles
-centerlines = [[line[0].strip(), float(line[3])] for line in lines]
-leftlines = [[line[1].strip(), float(line[3])+0.15] for line in lines]
-rightlines = [[line[2].strip(), float(line[3])-0.15] for line in lines]
+    return [centerlines, leftlines, rightlines]
+
+data0 = openDatas('./data_udacity/driving_log.csv')
+data1 = openDatas('./data_round_1/driving_log.csv')
+data2 = openDatas('./data_round_2/driving_log.csv')
+data3 = openDatas('./data_round_3/driving_log.csv')
+
+centerlines = data0[0] + data1[0] + data2[0] + data3[0]
+leftlines = data0[1] + data1[1] + data2[1] + data3[1]
+rightlines = data0[2] + data1[2] + data2[2] + data3[2]
 
 count = len(centerlines)
 train_len = int(count*0.95)
+
 
 # splits data into 85% traindata, 15% valdata
 def train_val_split(center, left, right):
