@@ -5,7 +5,7 @@ from scipy.misc import imread
 from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 from keras.layers import Convolution2D, Dropout, BatchNormalization
-from keras.layers.core import Flatten, Dense, Activation
+from keras.layers.core import Flatten, Dense, Activation, Dropout
 from keras.utils import np_utils
 from keras.optimizers import Adam
 import numpy as np
@@ -113,6 +113,7 @@ model.add(Convolution2D(64, kernel_3[0], kernel_3[1], border_mode='valid'))
 model.add(Convolution2D(64, kernel_3[0], kernel_3[1], border_mode='valid'))
 model.add(Flatten())
 model.add(Dense(100))
+model.add(Dropout(0.5))
 model.add(Dense(50))
 model.add(Dense(10))
 model.add(Dense(1))
