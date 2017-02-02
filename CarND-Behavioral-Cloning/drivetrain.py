@@ -30,10 +30,10 @@ def openDatas(path):
 
     return [centerlines, leftlines, rightlines]
 
-data0 = openDatas('./data_udacity/driving_log.csv')
-data1 = openDatas('./data_round_1/driving_log.csv')
-data2 = openDatas('./data_round_2/driving_log.csv')
-data3 = openDatas('./data_round_3/driving_log.csv')
+data0 = openDatas('./data/driving_logu.csv')
+data1 = openDatas('./data/driving_log1.csv')
+data2 = openDatas('./data/driving_log2.csv')
+data3 = openDatas('./data/driving_log3.csv')
 
 centerlines = data0[0] + data1[0] + data2[0] + data3[0]
 leftlines = data0[1] + data1[1] + data2[1] + data3[1]
@@ -74,7 +74,8 @@ def get_image(filename):
     # Crop 55 from top, 15 from bottom with splice = img[55:135, :, :]
     # Random Flip Y
     # Random Perturb angle
-    img = imread('./data/' + filename)
+    filename = filename[filename.rfind('/')+1:]
+    img = imread('./data/IMG/' + filename)
     img = img[55:135,:,:]
     return img
 
@@ -118,9 +119,9 @@ model.add(Dense(1))
 model.summary()
 
 # Compile and train model
-epoch = 7
+epoch = 10
 batch = 256
-sampEpoch = 40000
+sampEpoch = 80000
 model.compile(loss='mse', optimizer=Adam())
 
 earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto')
