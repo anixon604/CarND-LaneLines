@@ -1,7 +1,7 @@
 import csv, json, random
-from cv2 import flip
+from cv2 import flip, cvtColor
 from random import shuffle
-from scipy.misc import imread
+from scipy.misc import imread, imresize
 from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 from keras.layers import Convolution2D, Dropout, BatchNormalization
@@ -77,6 +77,8 @@ def get_image(filename):
     filename = filename[filename.rfind('/')+1:]
     img = imread('./data/IMG/' + filename)
     img = img[55:135,:,:]
+    img = imresize(img,(40,100))
+    img = cvtColor(img,cv2.COLOR_BGR2GRAY)
     return img
 
 
