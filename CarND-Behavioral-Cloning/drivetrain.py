@@ -1,5 +1,5 @@
 import csv, json, random
-from cv2 import flip, cvtColor
+from cv2 import flip, cvtColor, COLOR_BGR2GRAY
 from random import shuffle
 from scipy.misc import imread, imresize
 from keras.callbacks import EarlyStopping
@@ -77,8 +77,9 @@ def get_image(filename):
     filename = filename[filename.rfind('/')+1:]
     img = imread('./data/IMG/' + filename)
     img = img[55:135,:,:]
-    img = imresize(img,(40,100))
-    img = cvtColor(img,cv2.COLOR_BGR2GRAY)
+    img = imresize(img,(40,160))
+    #img = cvtColor(img,COLOR_BGR2GRAY)
+    #img = np.expand_dims(img, axis=2)
     return img
 
 
@@ -97,18 +98,17 @@ def generate_arrays_from_list(data): # generated from LISTS
 ### MODEL NVIDIA Base "End to End Learning for SDC" Bojarski, Testa, et al. ---
 
 # conv kernel sizes
-kernel_3 = (3,3)
-kernel_5 = (5,5)
+kernel_3 = (2,2)
+kernel_5 = (4,4)
 
 # strides, arg subsample
 stride_2 = (2,2)
 
 # possible resizing to lower for speed
-input_shape = (80, 320, 3)
+input_shape = (40, 160, 3)
 
 model = Sequential()
-model.add(BatchNormalization(input_shape=input_shape))
-model.add(Convolution2D(24, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2))
+model.add(Convolution2D(24, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2, input_shape=input_shape))
 model.add(Convolution2D(36, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2))
 model.add(Dropout(0.5))
 model.add(Convolution2D(48, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2))
