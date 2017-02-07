@@ -108,18 +108,18 @@ stride_2 = (2,2)
 input_shape = (40, 160, 1)
 
 model = Sequential()
-model.add(Convolution2D(24, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2, input_shape=input_shape))
-model.add(Convolution2D(36, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2))
-model.add(Dropout(0.5))
-model.add(Convolution2D(48, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2))
-model.add(Convolution2D(64, kernel_3[0], kernel_3[1], border_mode='valid'))
-model.add(Convolution2D(64, kernel_3[0], kernel_3[1], border_mode='valid'))
-model.add(Dropout(0.5))
+model.add(BatchNormalization(input_shape=input_shape))
+model.add(Convolution2D(24, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
+model.add(Convolution2D(36, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
+model.add(Convolution2D(48, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
+model.add(Convolution2D(64, kernel_3[0], kernel_3[1], activation='relu', border_mode='valid'))
+model.add(Convolution2D(64, kernel_3[0], kernel_3[1], activation='relu', border_mode='valid'))
+#model.add(Dropout(0.4))
 model.add(Flatten())
-model.add(Dense(100))
-model.add(Dense(50))
-model.add(Dense(10))
-model.add(Dense(1))
+model.add(Dense(100, activation='relu'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(10, activation='relu'))
+model.add(Dense(1, activation='tanh'))
 model.summary()
 
 # Compile and train model
@@ -128,7 +128,7 @@ batch = 256
 sampEpoch = 80000
 model.compile(loss='mse', optimizer=Adam())
 
-earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto')
+earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto')
 
 
 model.fit_generator(generate_arrays_from_list(traindata),
