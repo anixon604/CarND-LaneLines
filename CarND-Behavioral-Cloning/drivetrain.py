@@ -67,7 +67,8 @@ def process_line(line): # numpy array on y
     if angleAdj % 2 == 0 and angle != 0:
         img = flip(img,1)
         angle = -angle
-
+    # add back channel from Gray and Flip
+    img = np.expand_dims(img, axis=2)
     return np.array([img]),np.array([angle])
 
 def get_image(filename):
@@ -78,8 +79,7 @@ def get_image(filename):
     img = imread('./data/IMG/' + filename)
     img = img[55:135,:,:]
     img = imresize(img,(40,160))
-    #img = cvtColor(img,COLOR_BGR2GRAY)
-    #img = np.expand_dims(img, axis=2)
+    img = cvtColor(img,COLOR_BGR2GRAY)
     return img
 
 
@@ -105,7 +105,7 @@ kernel_5 = (4,4)
 stride_2 = (2,2)
 
 # possible resizing to lower for speed
-input_shape = (40, 160, 3)
+input_shape = (40, 160, 1)
 
 model = Sequential()
 model.add(Convolution2D(24, kernel_5[0], kernel_5[1], border_mode='valid', subsample=stride_2, input_shape=input_shape))
