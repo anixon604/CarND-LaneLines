@@ -2,7 +2,7 @@ import csv, json, random
 from cv2 import flip, cvtColor, COLOR_BGR2GRAY
 from random import shuffle
 from scipy.misc import imread, imresize
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.models import Sequential
 from keras.layers import Convolution2D, Dropout, BatchNormalization
 from keras.layers.core import Flatten, Dense, Activation, Dropout
