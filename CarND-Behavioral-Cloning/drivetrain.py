@@ -114,9 +114,9 @@ model.add(Convolution2D(36, kernel_5[0], kernel_5[1], activation='relu', border_
 model.add(Convolution2D(48, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
 model.add(Convolution2D(64, kernel_3[0], kernel_3[1], activation='relu', border_mode='valid'))
 model.add(Convolution2D(64, kernel_3[0], kernel_3[1], activation='relu', border_mode='valid'))
-#model.add(Dropout(0.4))
 model.add(Flatten())
 model.add(Dense(100, activation='relu'))
+model.add(Dropout(0.4))
 model.add(Dense(50, activation='relu'))
 model.add(Dense(10, activation='relu'))
 model.add(Dense(1, activation='tanh'))
@@ -125,7 +125,7 @@ model.summary()
 # Compile and train model
 epoch = 10
 batch = 128
-sampEpoch = 60000
+sampEpoch = 40000
 learnRate = 0.0001
 model.compile(loss='mse', optimizer=Adam(lr=learnRate))
 
