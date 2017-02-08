@@ -124,9 +124,10 @@ model.summary()
 
 # Compile and train model
 epoch = 10
-batch = 64
+batch = 128
 sampEpoch = 20000
-model.compile(loss='mse', optimizer=Adam())
+learnRate = 0.0001
+model.compile(loss='mse', optimizer=Adam(lr=learnRate))
 
 # checkpoint
 filepath="./model.h5"
