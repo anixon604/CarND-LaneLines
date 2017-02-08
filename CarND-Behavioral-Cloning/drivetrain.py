@@ -128,16 +128,18 @@ batch = 256
 sampEpoch = 80000
 model.compile(loss='mse', optimizer=Adam())
 
+# checkpoint
+filepath="./model.h5"
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
 earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto')
-
 
 model.fit_generator(generate_arrays_from_list(traindata),
     samples_per_epoch=sampEpoch, nb_epoch=epoch,
     validation_data=generate_arrays_from_list(valdata), nb_val_samples=len(valdata),
-    callbacks=[earlystop])
+    callbacks=[earlystop, checkpoint])
 
 # SAVE MODEL and WEIGHTS
-model.save_weights('./model.h5')
+# model.save_weights('./model.h5') - switched to callback
 json_string = model.to_json()
 
 with open('./model.json', 'w') as outfile:
