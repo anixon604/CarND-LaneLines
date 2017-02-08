@@ -7,7 +7,7 @@ import socketio
 import eventlet
 import eventlet.wsgi
 import time
-from cv2 import COLOR_BGR2GRAY, cvtColor
+from cv2 import COLOR_BGR2GRAY, cvtColor, COLOR_BGR2RGB
 from scipy.misc import imresize
 from PIL import Image
 from PIL import ImageOps
@@ -42,7 +42,7 @@ def telemetry(sid, data):
     image_array = image_array[55:135,:,:]
     image_array = imresize(image_array,(40,160))
     image_array = cvtColor(image_array,COLOR_BGR2RGB)
-    image_array = np.expand_dims(image_array, axis=2)
+    #image_array = np.expand_dims(image_array, axis=2)
     transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
