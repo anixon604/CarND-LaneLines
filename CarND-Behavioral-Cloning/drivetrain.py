@@ -124,13 +124,13 @@ model.summary()
 
 # Compile and train model
 epoch = 10
-batch = 256
-sampEpoch = 80000
+batch = 64
+sampEpoch = 20000
 model.compile(loss='mse', optimizer=Adam())
 
 # checkpoint
 filepath="./model.h5"
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='max')
 earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=2, verbose=0, mode='auto')
 
 model.fit_generator(generate_arrays_from_list(traindata),
