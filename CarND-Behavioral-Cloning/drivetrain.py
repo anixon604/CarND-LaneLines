@@ -62,7 +62,7 @@ def process_line(line): # numpy array on y
 
     #random perturb angle 50% chance
     if angleAdj <= 3:
-        angle += (angleAdj*0.001)
+        angle += (angle*random.uniform(-1,1)/30)
     #50% chance of flipping image
     if angleAdj % 2 == 0 and angle != 0:
         img = flip(img,1)
@@ -110,24 +110,24 @@ input_shape = (40, 160, 3)
 model = Sequential()
 model.add(BatchNormalization(input_shape=input_shape))
 model.add(Convolution2D(24, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
-model.add(Dropout(0.4))
+#model.add(Dropout(0.4))
 model.add(Convolution2D(36, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
-model.add(Convolution2D(48, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
-model.add(Convolution2D(64, kernel_3[0], kernel_3[1], activation='relu', border_mode='valid'))
+#model.add(Convolution2D(48, kernel_5[0], kernel_5[1], activation='relu', border_mode='valid', subsample=stride_2))
+#model.add(Convolution2D(64, kernel_3[0], kernel_3[1], activation='relu', border_mode='valid'))
 model.add(Convolution2D(64, kernel_3[0], kernel_3[1], activation='relu', border_mode='valid'))
 model.add(Flatten())
-model.add(Dense(100, activation='relu'))
-model.add(Dropout(0.4))
+#model.add(Dense(100, activation='relu'))
+#model.add(Dropout(0.4))
 model.add(Dense(50, activation='relu'))
+model.add(Dropout(0.4))
 model.add(Dense(10, activation='relu'))
 model.add(Dense(1, activation='tanh'))
 model.summary()
 
 # Compile and train model
 epoch = 10
-batch = 128
 sampEpoch = 20000
-learnRate = 0.0001
+learnRate = 0.001
 model.compile(loss='mse', optimizer=Adam(lr=learnRate))
 
 # checkpoint
