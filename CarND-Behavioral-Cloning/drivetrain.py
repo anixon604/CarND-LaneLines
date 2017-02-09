@@ -25,8 +25,8 @@ def openDatas(path):
 
     # Split data into CENTER/LEFT/RIGHT images with corresponding angles
     centerlines = [[line[0].strip(), float(line[3])] for line in lines]
-    leftlines = [[line[1].strip(), float(line[3])+0.15] for line in lines]
-    rightlines = [[line[2].strip(), float(line[3])-0.15] for line in lines]
+    leftlines = [[line[1].strip(), float(line[3])+0.17] for line in lines]
+    rightlines = [[line[2].strip(), float(line[3])-0.17] for line in lines]
 
     return [centerlines, leftlines, rightlines]
 
@@ -57,14 +57,14 @@ traindata, valdata = train_val_split(centerlines,leftlines,rightlines)
 
 def process_line(line): # numpy array on y
     angle = line[1]
-    angleAdj = random.randrange(-3,6)
+    #angleAdj = random.randrange(-3,6)
     img = get_image(line[0])
 
     #random perturb angle 50% chance
-    if angleAdj <= 3:
+    if random.randrange(2):
         angle += (angle*random.uniform(-1,1)/30)
     #50% chance of flipping image
-    if angleAdj % 2 == 0 and angle != 0:
+    if random.randrange(2) and angle != 0:
         img = flip(img,1)
         angle = -angle
     # add back channel from Gray and Flip
@@ -79,7 +79,7 @@ def get_image(filename):
     img = imread('./data/IMG/' + filename)
     img = img[55:135,:,:]
     img = imresize(img,(40,160))
-    img = cvtColor(img,COLOR_BGR2RGB)
+    #img = cvtColor(img,COLOR_BGR2RGB)
     return img
 
 
@@ -126,13 +126,13 @@ model.summary()
 
 # Compile and train model
 epoch = 10
-sampEpoch = 20000
+sampEpoch = 22000
 learnRate = 0.0001
 model.compile(loss='mse', optimizer=Adam(lr=learnRate))
 
 # checkpoint
 filepath="./model.h5"
-checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=1, verbose=0, mode='auto')
 
 model.fit_generator(generate_arrays_from_list(traindata),
