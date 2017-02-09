@@ -40,7 +40,7 @@ leftlines = data0[1] + data1[1] + data2[1] + data3[1]
 rightlines = data0[2] + data1[2] + data2[2] + data3[2]
 
 count = len(centerlines)
-train_len = int(count*0.95)
+train_len = int(count*0.8)
 
 
 # splits data into 85% traindata, 15% valdata
@@ -137,11 +137,10 @@ earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=1, verbose=0
 
 model.fit_generator(generate_arrays_from_list(traindata),
     samples_per_epoch=sampEpoch, nb_epoch=epoch,
-    validation_data=generate_arrays_from_list(valdata), nb_val_samples=len(valdata),
+    validation_data=generate_arrays_from_list(valdata), nb_val_samples=(sampEpoch*0.2),
     callbacks=[earlystop, checkpoint])
 
 # SAVE MODEL and WEIGHTS
-# model.save_weights('./model.h5') - switched to callback
 json_string = model.to_json()
 
 with open('./model.json', 'w') as outfile:
