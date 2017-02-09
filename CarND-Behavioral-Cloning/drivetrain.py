@@ -127,7 +127,7 @@ model.summary()
 # Compile and train model
 epoch = 10
 sampEpoch = 20000
-learnRate = 0.001
+learnRate = 0.0001
 model.compile(loss='mse', optimizer=Adam(lr=learnRate))
 
 # checkpoint
