@@ -126,7 +126,7 @@ model.summary()
 
 # Compile and train model
 epoch = 10
-sampEpoch = 22000
+sampEpoch = 50000
 learnRate = 0.0001
 model.compile(loss='mse', optimizer=Adam(lr=learnRate))
 
