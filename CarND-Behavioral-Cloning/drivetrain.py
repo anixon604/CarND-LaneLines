@@ -94,7 +94,7 @@ def process_line(line):
         img = flip(img,1)
         angle = -angle
     #img = np.expand_dims(img, axis=2) # Used if grayscaling
-    return np.array([img]),np.array([angle])
+    return img,angle
 
 # Takes in a filename
 # Returns a cropped image
@@ -114,6 +114,8 @@ def get_image(filename):
 # Yields a processed image (x) with corresponding angle value (y)
 def generate_arrays_from_list(data, batch_size): # generated from LISTS
         while 1:
+            x = []
+            y = []
             cams = len(data) # number of cameras. allows generation on center only validation
             size = len(data[0]) # number of images per camera
             for i in range(batch_size):
@@ -126,7 +128,7 @@ def generate_arrays_from_list(data, batch_size): # generated from LISTS
                 a, b = process_line(line) # x - image, y - angle
                 x.append(a)
                 y.append(b)
-            yield (x, y)
+            yield (np.array(x), np.array(y))
 
 ### MODEL NVIDIA Base "End to End Learning for SDC" Bojarski, Testa, et al. ---
 
@@ -139,16 +141,16 @@ stride_2 = (2,2)
 input_shape = (40, 160, 3)
 
 model = Sequential()
-model.add(Convolution2D(24, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2))
+model.add(Convolution2D(24, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2, input_shape=input_shape))
 #model.add(Dropout(0.4))
-model.add(BatchNormalization(input_shape=input_shape))
+model.add(BatchNormalization())
 model.add(Convolution2D(36, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2))
 model.add(Convolution2D(48, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2))
 model.add(Convolution2D(64, kernel_two[0], kernel_two[1], activation='relu', border_mode='valid'))
 model.add(Convolution2D(64, kernel_two[0], kernel_two[1], activation='relu', border_mode='valid'))
 model.add(Flatten())
 model.add(Dense(100, activation='relu'))
-#model.add(Dropout(0.4))
+model.add(Dropout(0.4))
 model.add(Dense(50, activation='relu'))
 #model.add(Dropout(0.4))
 model.add(Dense(10, activation='relu'))
@@ -170,7 +172,7 @@ earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=1, verbose=0
 
 model.fit_generator(generate_arrays_from_list(traindata, batch_size),
     samples_per_epoch=sampEpoch, nb_epoch=epoch,
-    validation_data=generate_arrays_from_list(valdata batch_size), nb_val_samples=(sampEpoch*sampValid),
+    validation_data=generate_arrays_from_list(valdata, batch_size), nb_val_samples=(sampEpoch*sampValid),
     callbacks=[earlystop, checkpoint])
 
 # SAVE MODEL and WEIGHTS
