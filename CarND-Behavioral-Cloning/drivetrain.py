@@ -122,11 +122,11 @@ def generate_arrays_from_list(data, batch_size): # generated from LISTS
                 ind = random.randrange(0,size)
                 if cams == 1:
                     line = data[0][ind] # choose random image from center camera
-                else: # heavy load on right/left data. 11% (0.3*0.3) chance of center
-                    if random.randrange(0,3) <= 1:
-                    	camlist = random.randrange(1,3)
+                else: # heavy load on right/left data. 33% (0.3*0.3) chance of center
+                    if random.randrange(0,3) == 2:
+                    	camlist = 0 # center cam
                     else:
-                        camlist = random.randrange(0,3)
+                        camlist = random.randrange(1,3) # right or left cam
                     line = data[camlist][ind] # choose random image from random camera
                 a, b = process_line(line) # x - image, y - angle
                 x.append(a)
