@@ -150,7 +150,7 @@ model.add(Convolution2D(64, kernel_two[0], kernel_two[1], activation='relu', bor
 model.add(Convolution2D(64, kernel_two[0], kernel_two[1], activation='relu', border_mode='valid'))
 model.add(Flatten())
 model.add(Dense(100, activation='relu'))
-model.add(Dropout(0.4))
+#model.add(Dropout(0.4))
 model.add(Dense(50, activation='relu'))
 #model.add(Dropout(0.4))
 model.add(Dense(10, activation='relu'))
