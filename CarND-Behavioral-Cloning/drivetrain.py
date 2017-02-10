@@ -67,7 +67,7 @@ def train_val_center(center, left, right):
     train_len = int(count*0.7)
     val_len = count - train_len
     traindata = [center[0:train_len], left, right]
-    valdata = [center[train_len]]
+    valdata = [center[train_len:]]
 
     return traindata, valdata
 
