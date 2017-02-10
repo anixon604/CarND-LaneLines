@@ -145,8 +145,8 @@ input_shape = (40, 160, 3)
 
 model = Sequential()
 
-model.add(BatchNormalization(input_shape=input_shape))
-model.add(Convolution2D(24, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2))
+#model.add(BatchNormalization(input_shape=input_shape))
+model.add(Convolution2D(24, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2, input_shape=input_shape))
 #model.add(Dropout(0.4))
 #model.add(BatchNormalization())
 #model.add(Activation('relu'))
