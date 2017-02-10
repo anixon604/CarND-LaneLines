@@ -38,10 +38,10 @@ def telemetry(sid, data):
     # The current image from the center camera of the car
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
+    # print(image.mode) # Image.open creates RGB mode images
     image_array = np.asarray(image)
     image_array = image_array[55:135,:,:]
     image_array = imresize(image_array,(40,160))
-    image_array = cvtColor(image_array,COLOR_BGR2RGB)
     #image_array = np.expand_dims(image_array, axis=2)
     transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
