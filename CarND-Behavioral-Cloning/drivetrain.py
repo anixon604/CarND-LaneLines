@@ -122,8 +122,11 @@ def generate_arrays_from_list(data, batch_size): # generated from LISTS
                 ind = random.randrange(0,size)
                 if cams == 1:
                     line = data[0][ind] # choose random image from center camera
-                else:
-                    camlist = random.randrange(0,3)
+                else: # heavy load on right/left data. 11% (0.3*0.3) chance of center
+                    if random.randrange(0,3) <= 1:
+                    	camlist = random.randrange(1,3)
+                    else:
+                        camlist = random.randrange(0,3)
                     line = data[camlist][ind] # choose random image from random camera
                 a, b = process_line(line) # x - image, y - angle
                 x.append(a)
@@ -141,6 +144,7 @@ stride_2 = (2,2)
 input_shape = (40, 160, 3)
 
 model = Sequential()
+
 model.add(Convolution2D(24, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2, input_shape=input_shape))
 #model.add(Dropout(0.4))
 model.add(BatchNormalization())
