@@ -42,6 +42,7 @@ def telemetry(sid, data):
     image_array = np.asarray(image)
     image_array = image_array[55:135,:,:]
     image_array = imresize(image_array,(40,160))
+    image_array = image_array/255.0
     #image_array = np.expand_dims(image_array, axis=2)
     transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
