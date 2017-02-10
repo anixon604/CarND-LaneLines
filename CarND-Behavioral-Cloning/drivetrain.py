@@ -107,21 +107,25 @@ def get_image(filename):
     img = imread('./data/IMG/' + filename)
     img = img[55:135,:,:]
     img = imresize(img,(40,160))
+    img = img/255
     return img
 
 # Takes in a list of camera angles and filenames
 # Yields a processed image (x) with corresponding angle value (y)
-def generate_arrays_from_list(data): # generated from LISTS
+def generate_arrays_from_list(data, batch_size): # generated from LISTS
         while 1:
             cams = len(data) # number of cameras. allows generation on center only validation
             size = len(data[0]) # number of images per camera
-            ind = random.randrange(0,size)
-            if cams == 1:
-                line = data[0][ind] # choose random image from center camera
-            else:
-                camlist = random.randrange(0,3)
-                line = data[camlist][ind] # choose random image from random camera
-            x, y = process_line(line) # x - image, y - angle
+            for i in range(batch_size):
+                ind = random.randrange(0,size)
+                if cams == 1:
+                    line = data[0][ind] # choose random image from center camera
+                else:
+                    camlist = random.randrange(0,3)
+                    line = data[camlist][ind] # choose random image from random camera
+                a, b = process_line(line) # x - image, y - angle
+                x.append(a)
+                y.append(b)
             yield (x, y)
 
 ### MODEL NVIDIA Base "End to End Learning for SDC" Bojarski, Testa, et al. ---
@@ -135,9 +139,9 @@ stride_2 = (2,2)
 input_shape = (40, 160, 3)
 
 model = Sequential()
-model.add(BatchNormalization(input_shape=input_shape))
 model.add(Convolution2D(24, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2))
 #model.add(Dropout(0.4))
+model.add(BatchNormalization(input_shape=input_shape))
 model.add(Convolution2D(36, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2))
 model.add(Convolution2D(48, kernel_one[0], kernel_one[1], activation='relu', border_mode='valid', subsample=stride_2))
 model.add(Convolution2D(64, kernel_two[0], kernel_two[1], activation='relu', border_mode='valid'))
@@ -152,6 +156,7 @@ model.add(Dense(1, activation='tanh'))
 model.summary()
 
 # Compile and train model
+batch_size = 64
 epoch = 10
 sampEpoch = 50000
 sampValid = 0.2 # percentage in relation to sampEpoch
@@ -163,9 +168,9 @@ filepath="./model.h5"
 checkpoint = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=1, verbose=0, mode='auto')
 
-model.fit_generator(generate_arrays_from_list(traindata),
+model.fit_generator(generate_arrays_from_list(traindata, batch_size),
     samples_per_epoch=sampEpoch, nb_epoch=epoch,
-    validation_data=generate_arrays_from_list(valdata), nb_val_samples=(sampEpoch*sampValid),
+    validation_data=generate_arrays_from_list(valdata batch_size), nb_val_samples=(sampEpoch*sampValid),
     callbacks=[earlystop, checkpoint])
 
 # SAVE MODEL and WEIGHTS
