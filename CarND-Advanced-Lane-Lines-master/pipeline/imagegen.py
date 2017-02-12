@@ -11,7 +11,7 @@ dist = dist_pickle["dist"]
 # absolute value of sobel
 def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0,255)):
     # Calculate directional gradient
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     if orient == 'x':
         abs_sobel = np.absolute(cv2.Sobel(gray, cv2.CV_64F, 1, 0))
     if orient == 'y':
@@ -59,8 +59,20 @@ def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi/2)):
     # Return the binary image
     return binary_output
 
-def color_threshold(img, sthresh, vthresh):
+def color_threshold(img, sthresh=(0,255), vthresh=(0,255)):
+    hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
+    s_channel = hls[:,:,2]
+    s_binary = np.zeros_like(s_channel)
+    s_binary[(s_channel >= sthresh[0]) & (s_channel <= sthresh[1])] = 1
 
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    v_channel = hsv[:,:,2]
+    v_binary = np.zeros_like(v_channel)
+    v_binary[(v_channel >= vthresh[0]) & (v_channel <= vthresh[1])] = 1
+
+    output = np.zeros_like(s_channel)
+    output[(s_binary == 1) & (v_binary == 1)] = 1
+    return output
 
 
 images = glob.glob("../test_images/test*.jpg")
@@ -74,15 +86,15 @@ for idx, fname in enumerate(images):
 
     # process image and generate binary pixel of interest
     preproImage = np.zeros_like(img[:,:,0])
-    gradx = abs_sobel_thresh(img, orient='x', thresh=(12,255))
-    grady = abs_sobel_thresh(img, orient='y', thresh=(25,255))
+    gradx = abs_sobel_thresh(img, orient='x', thresh=(8,255)) # 12
+    grady = abs_sobel_thresh(img, orient='y', thresh=(25,255)) # 25
     c_binary = color_threshold(img, sthresh=(100,255), vthresh=(50,255))
 
     # apply to preproImage
     preproImage[((gradx == 1) & (grady == 1) | (c_binary == 1) )] = 255
 
 
-    result = img
+    result = preproImage
 
     write_name = "../test_images/tracked"+str(idx+1)+".jpg"
     cv2.imwrite(write_name, result)

@@ -17,7 +17,7 @@ images = glob.glob('../camera_cal/calibration*.jpg')
 # Step through the list and search for chessboard corners
 for idx, fname in enumerate(images):
     img = cv2.imread(fname)
-    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
 
     # Find the chessboard corners
     ret, corners = cv2.findChessboardCorners(gray, (9,6),None)
