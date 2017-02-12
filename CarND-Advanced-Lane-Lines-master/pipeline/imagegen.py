@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import glob
 import pickle
+from linefitter import LineFitter
 
 # Read in the mtx and dist
 dist_pickle = pickle.load(open('../camera_cal/calibration_pickle.p', 'rb'))
@@ -20,7 +21,7 @@ def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0,255)):
     scaled_sobel = np.uint8(255*abs_sobel/np.max(abs_sobel))
     binary_output = np.zeros_like(scaled_sobel)
     # Apply threshold
-    binary_output[(scaled_sobel >= thresh[0]) & (scaled_sobel <= thresh[1])]
+    binary_output[(scaled_sobel >= thresh[0]) & (scaled_sobel <= thresh[1])] = 1
 
     return binary_output
 
@@ -59,6 +60,7 @@ def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi/2)):
     # Return the binary image
     return binary_output
 
+# both HLS and HSV. to utilize a single threshold set opposing to 0,255
 def color_threshold(img, sthresh=(0,255), vthresh=(0,255)):
     hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
     s_channel = hls[:,:,2]
@@ -74,8 +76,15 @@ def color_threshold(img, sthresh=(0,255), vthresh=(0,255)):
     output[(s_binary == 1) & (v_binary == 1)] = 1
     return output
 
+def window_mask(width, height, img_ref, center, level):
+    output = np.zeros_like(img_ref)
+    output[int(img_ref.shape[0]-(level+1)*height):int(img_ref.shape[0]-level*height),
+        max(0,int(center-width)):min(int(center+width),img_ref.shape[1])] = 1
+    return output
 
 images = glob.glob("../test_images/test*.jpg")
+#images = glob.glob("../test_images/straight*.jpg") # for perspective src calibration
+#images = glob.glob("../camera_cal/calibration1.jpg") # for undistort sample
 
 for idx, fname in enumerate(images):
     # read in image
@@ -86,15 +95,33 @@ for idx, fname in enumerate(images):
 
     # process image and generate binary pixel of interest
     preproImage = np.zeros_like(img[:,:,0])
-    gradx = abs_sobel_thresh(img, orient='x', thresh=(8,255)) # 12
+    gradx = abs_sobel_thresh(img, orient='x', thresh=(12,255)) # 12
     grady = abs_sobel_thresh(img, orient='y', thresh=(25,255)) # 25
     c_binary = color_threshold(img, sthresh=(100,255), vthresh=(50,255))
 
     # apply to preproImage
     preproImage[((gradx == 1) & (grady == 1) | (c_binary == 1) )] = 255
 
+    # perspective transformation area
+    img_size = (img.shape[1], img.shape[0])
 
-    result = preproImage
+    # transform source trapezoid manually plotted with GIMP to get best values
+    # transform destination trapezoid based on offset of img_size
+    src = np.float32([[585,457],[698,457],[250,687],[1060,687]])
+    offset = img_size[0]*.23
+    dst = np.float32([[offset, 0], [img_size[0]-offset, 0],[offset, img_size[1]],
+        [img_size[0]-offset, img_size[1]]])
 
-    write_name = "../test_images/tracked"+str(idx+1)+".jpg"
-    cv2.imwrite(write_name, result)
+    # perspective transform Matrix and inverse
+    M = cv2.getPerspectiveTransform(src, dst)
+    Minv = cv2.getPerspectiveTransform(dst, src)
+    binWarped = cv2.warpPerspective(preproImage, M, img_size, flags=cv2.INTER_LINEAR)
+
+    fitter = LineFitter()
+    left_fitx, right_fitx = fitter.first_lane_extraction(binWarped, fname, visual=True)
+
+    # EXPORT -------------
+
+    # result = binWarped
+    # write_name = "../test_images/ptran"+fname[-5:]
+    # cv2.imwrite(write_name, result)
