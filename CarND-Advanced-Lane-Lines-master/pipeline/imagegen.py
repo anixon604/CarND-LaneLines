@@ -82,9 +82,14 @@ def window_mask(width, height, img_ref, center, level):
         max(0,int(center-width)):min(int(center+width),img_ref.shape[1])] = 1
     return output
 
-images = glob.glob("../test_images/test*.jpg")
+#images = glob.glob("../test_images/test*.jpg")
 #images = glob.glob("../test_images/straight*.jpg") # for perspective src calibration
 #images = glob.glob("../camera_cal/calibration1.jpg") # for undistort sample
+# below is a double frame to test first frame line extraction + subsequent frame extraction
+images = ["../test_images/test2.jpg","../test_images/test2.jpg"]
+
+# instantiate the linefitter to be used later for sliding window and plotting
+fitter = LineFitter(margin = 70, minpix = 34)
 
 for idx, fname in enumerate(images):
     # read in image
@@ -117,8 +122,7 @@ for idx, fname in enumerate(images):
     Minv = cv2.getPerspectiveTransform(dst, src)
     binWarped = cv2.warpPerspective(preproImage, M, img_size, flags=cv2.INTER_LINEAR)
 
-    fitter = LineFitter()
-    left_fitx, right_fitx = fitter.first_lane_extraction(binWarped, fname, visual=True)
+    left_fitx, right_fitx = fitter.lane_extraction(binWarped, fname, visual=True)
 
     # EXPORT -------------
 
