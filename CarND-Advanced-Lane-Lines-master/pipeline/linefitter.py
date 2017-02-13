@@ -5,41 +5,60 @@ import cv2
 
 class LineFitter():
 
-    def __init__(self, nwindows=9, margin=100, minpix=50):
+    def __init__(self, nwindows=9, margin=100, minpix=50, max_line_buffer=10):
 
+        #### PARAM VARS ####
         # flag to speed up subsequent detection by region of interest
         self.firstDetection = True
-
         # number of windows for sliding
         self.nwindows = nwindows
-
         # margin is the width of the windows
         self.margin = margin
-
         # minimum pixels in window
         self.minpix = minpix
 
+        self.YM_PER_PIX = 30/720 # meters per pixel in y dimension
+        self.xm_per_pix = 3.7/700 # meters per pixel in x dimension - DYNAMIC TO TRANFORM
+
+        #### POSITIONAL VARS ####
+        # left and right x-pixel positions
+        self.leftx = None
+        self.rightx = None
         #  second order polynomial fit
         self.left_fit = None
         self.right_fit = None
-
         # non zero pixels in image
         self.nonzerox = None
         self.nonzeroy = None
-
+        # y-axis
         self.ploty = None
+        self.lane_width = None
+        self.center_of_lane = None
 
+        #### BUFFER VARS ####
+        # buffer for line position averaging over frames
+        self.BUFFER_SIZE = max_line_buffer
+        self.buffer_pos = 0
+        self.buffer_full = False
+        # store for line buffers
+        self.l_buffer_left = np.zeros((self.BUFFER_SIZE,720))
+        self.l_buffer_right = np.zeros((self.BUFFER_SIZE,720))
+        # store for curve buffers
+        self.c_buffer_left = np.zeros(self.BUFFER_SIZE)
+        self.c_buffer_right = np.zeros(self.BUFFER_SIZE)
+
+    # plots indices from lane_extraction and next_lane_extraction functions
     def extract_polyfit(self, left_lane_inds, right_lane_inds, binWarped):
 
         # Extract left and right line pixel positions
-        leftx = self.nonzerox[left_lane_inds]
+        self.leftx = self.nonzerox[left_lane_inds]
         lefty = self.nonzeroy[left_lane_inds]
-        rightx = self.nonzerox[right_lane_inds]
+        self.rightx = self.nonzerox[right_lane_inds]
         righty = self.nonzeroy[right_lane_inds]
 
         # Fit a second order polynomial to each
-        self.left_fit = np.polyfit(lefty, leftx, 2)
-        self.right_fit = np.polyfit(righty, rightx, 2)
+        self.left_fit = np.polyfit(lefty, self.leftx, 2)
+        self.right_fit = np.polyfit(righty, self.rightx, 2)
 
         # Generate x and y values for plotting
         ploty = np.linspace(0, binWarped.shape[0] - 1, binWarped.shape[0])
@@ -47,8 +66,19 @@ class LineFitter():
         right_fitx = self.right_fit[0] * ploty ** 2 + self.right_fit[1] * ploty + self.right_fit[2]
         self.ploty = ploty # store in object
 
+        ## USED FOR CURVATURE AND LANE DRIFT
+        # calulate intersections of lines to Generate
+        # dynamic pixel to meter ratio, lane_width and center_of_lane point.
+        img_size = binWarped.shape
+        left_intersection = self.left_fit[0]*img_size[0]**2 + self.left_fit[1]*img_size[0] + self.left_fit[2]
+        right_intersection = self.right_fit[0]*img_size[0]**2 + self.right_fit[1]*img_size[0] + self.right_fit[2]
+        self.lane_width = right_intersection - left_intersection
+        self.center_of_lane = (left_intersection + right_intersection) / 2.0
+        self.xm_per_pix = 3.7 / self.lane_width # lane width
+
         return left_fitx, right_fitx
 
+    # initial lane extractor which uses histogram flattening to identify x_bases
     def lane_extraction(self, binWarped, fname, visual=False):
 
         # check if this is a first extraction or subsequent
@@ -124,6 +154,7 @@ class LineFitter():
 
         return left_fitx, right_fitx
 
+    # lane extractor for subsequent frames using previous position information for ROI
     def next_lane_extraction(self, binWarped, fname, visual=False):
         # Assume you now have a new warped binary image
         # from the next frame of video (also called "binWarped")
@@ -165,3 +196,53 @@ class LineFitter():
             cv2.imwrite(write_name, result)
 
         return left_fitx, right_fitx
+
+    # left and right buffered average of fit and curve radius using BUFFER_SIZE #of frames
+    def get_bufferedAvg(self, left_fitx, right_fitx, left_curverad, right_curverad):
+        # line buffer holds fit from past frames up to instantiated buffer limit
+        self.l_buffer_left[self.buffer_pos] = left_fitx
+        self.l_buffer_right[self.buffer_pos] = right_fitx
+        self.c_buffer_left[self.buffer_pos] = left_curverad
+        self.c_buffer_right[self.buffer_pos] = right_curverad
+        self.buffer_pos += 1
+
+        # check if buffer is full or not and assign devisor for avging accordingly
+        # if buffer is full set flag
+        if not self.buffer_full:
+            BuffSize = self.buffer_pos
+            if self.buffer_pos == self.BUFFER_SIZE:
+                self.buffer_full = True
+                BuffSize = self.BUFFER_SIZE
+        else:
+            BuffSize = self.BUFFER_SIZE
+
+        self.buffer_pos %= self.BUFFER_SIZE
+
+        avg_leftx = np.sum(self.l_buffer_left, axis=0) / BuffSize
+        avg_rightx = np.sum(self.l_buffer_right, axis=0) / BuffSize
+        avg_leftCurve = np.sum(self.c_buffer_left, axis=0) / BuffSize
+        avg_rightCurve = np.sum(self.c_buffer_right, axis=0) / BuffSize
+
+        return avg_leftx, avg_rightx, avg_leftCurve, avg_rightCurve
+
+    # calculate curvature in real world, float of Meters
+    def get_Curvature(self, leftx, rightx):
+        # Define conversions in x and y from pixels space to meters
+        y_eval = np.max(self.ploty)
+
+        # Fit new polynomials to x,y in world space
+        left_fit_cr = np.polyfit(self.ploty*self.YM_PER_PIX, leftx*self.xm_per_pix, 2)
+        right_fit_cr = np.polyfit(self.ploty*self.YM_PER_PIX, rightx*self.xm_per_pix, 2)
+
+        # Calculate the new radii of curvature
+        left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*self.YM_PER_PIX + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+        right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*self.YM_PER_PIX + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+
+        return left_curverad, right_curverad
+
+    # calculate deviation from center using offset in Meters
+    def get_Lane_Drift(self, img_size):
+
+        lane_drift = (self.center_of_lane - img_size[0] / 2.0) * self.xm_per_pix
+
+        return lane_drift
