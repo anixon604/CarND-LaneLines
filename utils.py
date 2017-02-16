@@ -29,6 +29,14 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block,
                        visualise=vis, feature_vector=feature_vec)
         return features
 
+# Returns HOG features for a specific patch (window) from full IMG
+def grab_hog_from_patch(ypos, xpos, nblocks_per_window, hog_list):
+     hog_feat1 = hog_list[0][ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
+     hog_feat2 = hog_list[1][ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
+     hog_feat3 = hog_list[2][ypos:ypos+nblocks_per_window, xpos:xpos+nblocks_per_window].ravel()
+     return np.hstack((hog_feat1, hog_feat2, hog_feat3))
+
+
 # Compute binned color features on 3 channels
 # size: shape downsize for speed
 def bin_spatial(img, size=(32, 32)):
