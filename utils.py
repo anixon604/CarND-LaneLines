@@ -1,9 +1,17 @@
 import matplotlib.image as mpimg
+import cv2
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
+import os
+import time
+from utils import *
+from sklearn.svm import LinearSVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.calibration import *
 from skimage.feature import hog
-
+from scipy.ndimage.measurements import label
 
 ### BEGIN FEATURE EXTRACTION OPTIONS ###
 
@@ -188,7 +196,7 @@ def draw_boxes(img, bboxes, color=(1, 0, 0), thick=6):
 
 # Draws boxes around detected cars using HEATMAP labels
 # using input from (scipy.ndimage.measurements.label)
-def draw_labeled_bboxes(img, labels, color=(0, 0, 255)):
+def draw_labeled_bboxes(img, labels, color=(0, 255, 0)):
     # Iterate through all detected cars
     for car_number in range(1, labels[1]+1):
         # Find pixels with each car_number label value
