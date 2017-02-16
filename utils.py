@@ -196,7 +196,7 @@ def draw_boxes(img, bboxes, color=(1, 0, 0), thick=6):
 
 # Draws boxes around detected cars using HEATMAP labels
 # using input from (scipy.ndimage.measurements.label)
-def draw_labeled_bboxes(img, labels, color=(0, 255, 0)):
+def draw_labeled_bboxes(img, labels, color=(255, 0, 0)):
     # Iterate through all detected cars
     for car_number in range(1, labels[1]+1):
         # Find pixels with each car_number label value
