@@ -55,7 +55,7 @@ def color_hist(img, nbins=32): #bins_range=(0, 256)):
 
 # Color mode conversion helper function
 def color_mode(img, color_space):
-    if color_space != 'RGB':
+    if color_space != 'RGB' and color_space != 'None':
         if color_space == 'HSV':
             feature_image = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
         elif color_space == 'LUV':
@@ -167,7 +167,18 @@ def apply_threshold(heatmap, threshold):
     # Return thresholded map
     return heatmap
 
-# Draws boxes around detected cars using heatmap labels
+# Draws simple boxes using COORDINATES
+def draw_boxes(img, bboxes, color=(1, 0, 0), thick=6):
+    # Make a copy of the image
+    imcopy = np.copy(img)
+    # Iterate through the bounding boxes
+    for bbox in bboxes:
+        # Draw a rectangle given bbox coordinates
+        cv2.rectangle(imcopy, bbox[0], bbox[1], color=color, thickness=thick)
+    # Return the image copy with boxes drawn
+    return imcopy
+
+# Draws boxes around detected cars using HEATMAP labels
 # using input from (scipy.ndimage.measurements.label)
 def draw_labeled_bboxes(img, labels, color=(0, 0, 255)):
     # Iterate through all detected cars
@@ -236,7 +247,7 @@ def search_windows(img, windows, svm, scaler=None, color_space='RGB',
                     hist_range=(0, 256), orient=9,
                     pix_per_cell=8, cell_per_block=2,
                     hog_channel=0, spatial_feat=True,
-                    hist_feat=True, hog_feat=True, clf_threshold=0.5, **kwargs):
+                    hist_feat=True, hog_feat=True):
 
     #1) Create an empty list to receive positive detection windows
     on_windows = []
