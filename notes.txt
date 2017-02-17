@@ -1,0 +1,29 @@
+color_space = 'YCrCb' # can be RGB, HSV, LUV, HLS, YUV, YCrCb
+orient = 9
+pix_per_cell = 8
+cell_per_block = 2
+hog_channel = 'ALL' # can be 0, 1, 2, 'ALL'
+spatial_size = (32, 32) # Spatial binning dimensions (downsizing)
+hist_bins = 32 # number of histogram bins
+-----------
+spatial_feat = True # Spatial features on or off
+hist_feat = True # Histogram features on or off
+hog_feat = True # HOG features on or off
+=============
+FINAL PARAMETERS
+color_space = YCrCb = 99.6% - performs slightly better from test and histogram observation
+orient = 8
+pix_per_cell = 16
+cells_per_block = 4
+
+hog_channel = 'ALL' because of distribution between random car/notcar pairs and lighting
+spatial_size 24 - went to 98.9 when lowered to 16. so will keep. back up at 24
+hist_bins = 16 bins fast operation and also histogram show enough resolution
+
+
+HSV = 99.1
+
+
+
+
+LUV didn't work for me.
