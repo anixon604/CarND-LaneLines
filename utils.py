@@ -164,17 +164,6 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32),
 
 ### BEGIN WINDOW HANDLING AND SEARCHING ###
 
-# Modifies heatmap. Increments on pixel areas on box where car present
-def add_heat(heatmap, bbox_list):
-    # Iterate through list of bboxes
-    for box in bbox_list:
-        # Add += 1 for all pixels inside each bbox
-        # Assuming each "box" takes the form ((x1, y1), (x2, y2))
-        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
-
-    # Return updated heatmap
-    return heatmap
-
 # Returns a new heatmap with thresholding applied
 def apply_threshold(heatmap, threshold):
     heatmap = heatmap.copy()
@@ -196,7 +185,7 @@ def draw_boxes(img, bboxes, color=(1, 0, 0), thick=6):
 
 # Draws boxes around detected cars using HEATMAP labels
 # using input from (scipy.ndimage.measurements.label)
-def draw_labeled_bboxes(img, labels, color=(255, 0, 0)):
+def draw_labeled_bboxes(img, labels, color=(0, 0, 255)):
     # Iterate through all detected cars
     for car_number in range(1, labels[1]+1):
         # Find pixels with each car_number label value

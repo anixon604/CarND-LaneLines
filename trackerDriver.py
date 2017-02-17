@@ -7,7 +7,8 @@ from buildCLF import *
 ### PARAMETERS ###
 
 # list of WINDOWS (ystart, ystop), size, cells_per_step (similar to overlap)
-windowList = [[(400,432),32,2],[(400,656),96,2],[(400,656),128,4]]
+#windowList = [[(400,464),32,2],[(400,656),96,2],[(400,656),128,4]]
+windowList = [[(400,464),32,4],[(400,656),96,2],[(400,720),128,4]]
 
 # Main function to find cars using regional patch for HOG and
 # heatmap identification for boxing
@@ -101,15 +102,13 @@ class Buffer():
         thresh_map = None
 
         self.buffer.append(heat_map)
+        # Create thresholded map over the buffer frames
+        thresh_map = np.sum(self.buffer, axis=0)
 
         if len(self.buffer) == self.MAX_BUFFER:
-            # Create thresholded map over the buffer frames
-            thresh_map = np.sum(self.buffer, axis=0)
             thresh_map = apply_threshold(thresh_map, threshold=self.threshold)
             # Drop the oldest map
             self.buffer = self.buffer[1:] # drop oldest heat_map
-        else:
-            thresh_map = heat_map
 
         labels = label(thresh_map)
         draw_img = draw_labeled_bboxes(np.copy(img), labels)
@@ -121,7 +120,7 @@ class Buffer():
 clf, X_scaler = buildCLF()
 
 # Create Buffered Processing Object
-buffProcess = Buffer(max_buffer = 10, threshold = 4, clf=clf)
+buffProcess = Buffer(max_buffer = 18, threshold = 8, clf=clf)
 
 #test_output = 'testProcessed.mp4'
 #clip = VideoFileClip('test_video.mp4')
