@@ -1,5 +1,10 @@
-#**Finding Lane Lines on the Road - Project**
+# Self-Driving Car Engineer Nanodegree
+# Computer Vision
+## Project: Find Lane Lines
+
 <img src="laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+
+### Overview
 
 This project uses computer vision techniques such as color selection, grayscaling, Gaussian smoothing, Canny Edge Detection and Hough transform line detection, in order to detect and overlay lines in images and videos (stream of images).
 
