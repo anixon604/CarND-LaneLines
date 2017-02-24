@@ -1,4 +1,4 @@
-#**Finding Lane Lines on the Road**
+#**Finding Lane Lines on the Road - Project**
 <img src="laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
 
 This project uses computer vision techniques such as color selection, grayscaling, Gaussian smoothing, Canny Edge Detection and Hough transform line detection, in order to detect and overlay lines in images and videos (stream of images).
